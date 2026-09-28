@@ -21,7 +21,15 @@ JaDev Music Master is an offline-first desktop audio workstation designed around
 
 The project is intended for Pop, Hip-Hop/R&B, Jazz, Melayu/Dangdut, Rock/Metal, EDM/House/Nightcore, Acoustic, Orchestral, Lo-fi, Reggae, religious/instrumental music and other styles. Genre/style detection is planned as an advisory signal; processing decisions should ultimately depend on the actual audio.
 
-## Windows — Download & Run
+## Download for Windows
+
+> **Windows EXE:** [Download JaDev Music Master](https://github.com/JaGir9/JaDev-Music-Master/actions)
+>
+> Open the latest successful **Build Windows EXE** run, then download the **JaDevMusicMaster-Windows** artifact. After extracting the ZIP, run `JaDevMusicMaster.exe`.
+>
+> **Current status:** development preview. A direct GitHub Releases download will replace the Actions link when the first stable release package is published.
+
+## Windows — Installation & Usage
 
 ### Recommended: prebuilt EXE
 
