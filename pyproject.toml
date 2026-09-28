@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "jadev-music-master"
+version = "0.1.0"
+description = "Professional offline audio mastering, conversion and mix workstation."
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+  "PySide6>=6.7,<7",
+  "numpy>=1.26,<3",
+  "scipy>=1.12,<2",
+  "soundfile>=0.12,<1",
+  "librosa>=0.10,<1",
+  "pyloudnorm>=0.1.1,<1",
+  "mutagen>=1.47,<2"
+]
+
+[project.scripts]
+jadev-music-master = "jadev_music_master.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
