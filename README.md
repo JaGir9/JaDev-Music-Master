@@ -23,11 +23,26 @@ The project is intended for Pop, Hip-Hop/R&B, Jazz, Melayu/Dangdut, Rock/Metal, 
 
 ## Download for Windows
 
-> **Windows EXE:** [Download JaDev Music Master](https://github.com/JaGir9/JaDev-Music-Master/actions)
->
-> Open the latest successful **Build Windows EXE** run, then download the **JaDevMusicMaster-Windows** artifact. After extracting the ZIP, run `JaDevMusicMaster.exe`.
->
-> **Current status:** development preview. A direct GitHub Releases download will replace the Actions link when the first stable release package is published.
+### Portable build included in this repository
+
+The automated Windows build publishes the portable application to:
+
+**[`JaDevMusicMaster-Windows/`](JaDevMusicMaster-Windows/)**
+
+After the build has been published:
+
+1. Click **Code → Download ZIP** on this repository.
+2. Extract the repository ZIP.
+3. Open the **`JaDevMusicMaster-Windows`** folder.
+4. Double-click **`JaDevMusicMaster.exe`**.
+5. Keep the accompanying `_internal`/runtime files in the same folder. They are required by the portable application.
+6. Python and FFmpeg do not need to be installed separately for this packaged build.
+
+**Direct EXE page (after the automated build publishes it):** [JaDevMusicMaster.exe](JaDevMusicMaster-Windows/JaDevMusicMaster.exe)
+
+A downloadable workflow artifact is also produced by every successful Windows build from the repository's **Actions** tab.
+
+> **Status:** Development Preview. The desktop packaging is operational, while the complete adaptive mastering/DSP feature set remains under active development.
 
 ## Windows — Installation & Usage
 
