@@ -1,12 +1,14 @@
-name: Build Windows EXE
+name: Build Windows Portable App
 
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "JaDevMusicMaster-Windows/**"
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-windows:
@@ -21,7 +23,7 @@ jobs:
           python-version: "3.11"
           cache: pip
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
@@ -33,25 +35,44 @@ jobs:
         run: |
           Invoke-WebRequest -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" -OutFile ffmpeg.zip
           Expand-Archive ffmpeg.zip -DestinationPath vendor
-          $dir = Get-ChildItem vendor -Directory | Select-Object -First 1
+          $dir = Get-ChildItem vendor -Directory | Where-Object { $_.Name -ne "ffmpeg" } | Select-Object -First 1
           New-Item -ItemType Directory -Force -Path vendor\ffmpeg\bin | Out-Null
           Copy-Item "$($dir.FullName)\bin\ffmpeg.exe" vendor\ffmpeg\bin\ffmpeg.exe
           Copy-Item "$($dir.FullName)\bin\ffprobe.exe" vendor\ffmpeg\bin\ffprobe.exe
 
-      - name: Build executable
-        shell: pwsh
-        run: pyinstaller --clean --noconfirm JaDevMusicMaster.spec
-
-      - name: Smoke test executable exists
+      - name: Build portable Windows application
         shell: pwsh
         run: |
-          if (!(Test-Path "dist\JaDevMusicMaster.exe")) { throw "EXE was not created" }
-          Get-Item "dist\JaDevMusicMaster.exe"
+          pyinstaller --clean --noconfirm --onedir --windowed --name JaDevMusicMaster --paths src --add-binary "vendor/ffmpeg/bin/ffmpeg.exe;vendor/ffmpeg/bin" --add-binary "vendor/ffmpeg/bin/ffprobe.exe;vendor/ffmpeg/bin" src/jadev_music_master/__main__.py
+          if (!(Test-Path "dist\JaDevMusicMaster\JaDevMusicMaster.exe")) { throw "EXE was not created" }
 
-      - name: Upload Windows executable
+      - name: Publish portable build inside repository
+        shell: pwsh
+        run: |
+          if (Test-Path "JaDevMusicMaster-Windows") { Remove-Item "JaDevMusicMaster-Windows" -Recurse -Force }
+          Copy-Item "dist\JaDevMusicMaster" "JaDevMusicMaster-Windows" -Recurse
+          @"
+          JaDev Music Master - Windows Portable
+
+          1. Keep this entire folder together.
+          2. Double-click JaDevMusicMaster.exe.
+          3. No Python installation is required.
+
+          This is a development preview build.
+          "@ | Set-Content "JaDevMusicMaster-Windows\HOW-TO-RUN.txt"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f JaDevMusicMaster-Windows
+          git diff --cached --quiet
+          if ($LASTEXITCODE -ne 0) {
+            git commit -m "Update Windows portable build [skip ci]"
+            git push
+          }
+
+      - name: Upload downloadable artifact
         uses: actions/upload-artifact@v4
         with:
           name: JaDevMusicMaster-Windows
-          path: dist/JaDevMusicMaster.exe
+          path: JaDevMusicMaster-Windows/
           if-no-files-found: error
           retention-days: 90
