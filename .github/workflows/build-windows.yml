@@ -1,0 +1,57 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install Python dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pyinstaller
+
+      - name: Download FFmpeg essentials
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip" -OutFile ffmpeg.zip
+          Expand-Archive ffmpeg.zip -DestinationPath vendor
+          $dir = Get-ChildItem vendor -Directory | Select-Object -First 1
+          New-Item -ItemType Directory -Force -Path vendor\ffmpeg\bin | Out-Null
+          Copy-Item "$($dir.FullName)\bin\ffmpeg.exe" vendor\ffmpeg\bin\ffmpeg.exe
+          Copy-Item "$($dir.FullName)\bin\ffprobe.exe" vendor\ffmpeg\bin\ffprobe.exe
+
+      - name: Build executable
+        shell: pwsh
+        run: pyinstaller --clean --noconfirm JaDevMusicMaster.spec
+
+      - name: Smoke test executable exists
+        shell: pwsh
+        run: |
+          if (!(Test-Path "dist\JaDevMusicMaster.exe")) { throw "EXE was not created" }
+          Get-Item "dist\JaDevMusicMaster.exe"
+
+      - name: Upload Windows executable
+        uses: actions/upload-artifact@v4
+        with:
+          name: JaDevMusicMaster-Windows
+          path: dist/JaDevMusicMaster.exe
+          if-no-files-found: error
+          retention-days: 90
