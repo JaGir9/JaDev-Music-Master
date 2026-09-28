@@ -6,6 +6,8 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+from jadev_music_master.runtime import bundled_binary
+
 
 @dataclass(slots=True)
 class ProbeResult:
@@ -17,28 +19,24 @@ class ProbeResult:
 
 
 def ffmpeg_available() -> bool:
-    return shutil.which("ffmpeg") is not None and shutil.which("ffprobe") is not None
+    ffmpeg = bundled_binary("ffmpeg")
+    ffprobe = bundled_binary("ffprobe")
+    ffmpeg_ok = Path(ffmpeg).exists() or shutil.which(ffmpeg) is not None
+    ffprobe_ok = Path(ffprobe).exists() or shutil.which(ffprobe) is not None
+    return ffmpeg_ok and ffprobe_ok
 
 
 def probe(path: str | Path) -> ProbeResult:
     command = [
-        "ffprobe",
-        "-v",
-        "error",
-        "-show_entries",
-        "format=duration,bit_rate:stream=codec_name,sample_rate,channels",
-        "-select_streams",
-        "a:0",
-        "-of",
-        "json",
-        str(path),
+        bundled_binary("ffprobe"), "-v", "error",
+        "-show_entries", "format=duration,bit_rate:stream=codec_name,sample_rate,channels",
+        "-select_streams", "a:0", "-of", "json", str(path),
     ]
     completed = subprocess.run(command, capture_output=True, text=True, check=True)
     data = json.loads(completed.stdout)
     streams = data.get("streams") or [{}]
     stream = streams[0]
     fmt = data.get("format") or {}
-
     return ProbeResult(
         duration=float(fmt["duration"]) if fmt.get("duration") else None,
         codec=stream.get("codec_name"),
@@ -49,7 +47,7 @@ def probe(path: str | Path) -> ProbeResult:
 
 
 def convert(source: str | Path, destination: str | Path, extra_args: list[str] | None = None) -> None:
-    command = ["ffmpeg", "-hide_banner", "-y", "-i", str(source)]
+    command = [bundled_binary("ffmpeg"), "-hide_banner", "-y", "-i", str(source)]
     if extra_args:
         command.extend(extra_args)
     command.append(str(destination))
