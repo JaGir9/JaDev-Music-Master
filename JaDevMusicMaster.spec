@@ -1,5 +1,3 @@
-from pathlib import Path
-
 from PyInstaller.utils.hooks import collect_submodules
 
 hiddenimports = collect_submodules("PySide6")
@@ -7,7 +5,10 @@ hiddenimports = collect_submodules("PySide6")
 a = Analysis(
     ["src/jadev_music_master/__main__.py"],
     pathex=["src"],
-    binaries=[],
+    binaries=[
+        ("vendor/ffmpeg/bin/ffmpeg.exe", "vendor/ffmpeg/bin"),
+        ("vendor/ffmpeg/bin/ffprobe.exe", "vendor/ffmpeg/bin"),
+    ],
     datas=[],
     hiddenimports=hiddenimports,
     noarchive=False,
@@ -16,11 +17,7 @@ a = Analysis(
 pyz = PYZ(a.pure)
 
 exe = EXE(
-    pyz,
-    a.scripts,
-    a.binaries,
-    a.datas,
-    [],
+    pyz, a.scripts, a.binaries, a.datas, [],
     name="JaDevMusicMaster",
     debug=False,
     bootloader_ignore_signals=False,
